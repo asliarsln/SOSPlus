@@ -79,3 +79,22 @@ button {
 #scoreBoard p {
   margin: 4px 0;
 }
+
+@keyframes sosPulse {
+  0% {
+    background: #ffd60a;
+    transform: scale(1);
+  }
+  50% {
+    background: #ff9500;
+    transform: scale(1.1);
+  }
+  100% {
+    background: #2c2c2e;
+    transform: scale(1);
+  }
+}
+
+.sos-highlight {
+  animation: sosPulse 1s ease-out;
+}

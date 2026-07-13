@@ -49,10 +49,10 @@ io.on("connection", (socket) => {
     if (room.board[index] !== null) return;
 
     room.board[index] = letter;
-    const sosCount = checkSOS(room.board, room.gridSize, index);
+    const result = checkSOS(room.board, room.gridSize, index);
 
-    if (sosCount > 0) {
-      room.scores[socket.id] = (room.scores[socket.id] || 0) + sosCount;
+    if (result.count > 0) {
+      room.scores[socket.id] = (room.scores[socket.id] || 0) + result.count;
     } else {
       const otherPlayer = room.players.find((id) => id !== socket.id);
       room.turn = otherPlayer;
@@ -65,6 +65,7 @@ io.on("connection", (socket) => {
       turn: room.turn,
       scores: room.scores,
       gameOver: isFull,
+      sosCells: result.cells,
     });
   });
 

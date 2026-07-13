@@ -62,15 +62,15 @@ socket.on("joinError", (message) => {
   errorMsgEl.textContent = message;
 });
 
-socket.on("moveMade", ({ board, turn, scores, gameOver }) => {
-  renderBoard(board, myGridSize);
+socket.on("moveMade", ({ board, turn, scores, gameOver, sosCells }) => {
+  renderBoard(board, myGridSize, sosCells);
   updateGameInfo(turn, scores);
   if (gameOver) {
     showGameOver(scores);
   }
 });
 
-function renderBoard(board, size) {
+function renderBoard(board, size, sosCells = []) {
   document.getElementById("lobby").style.display = "none";
   document.getElementById("gameInfo").style.display = "block";
 
@@ -86,6 +86,9 @@ function renderBoard(board, size) {
   board.forEach((cell, index) => {
     const cellDiv = document.createElement("div");
     cellDiv.className = "cell";
+    if (sosCells.includes(index)) {
+      cellDiv.classList.add("sos-highlight");
+    }
     cellDiv.textContent = cell || "";
     cellDiv.addEventListener("click", (e) => openLetterMenu(e, index));
     gridDiv.appendChild(cellDiv);

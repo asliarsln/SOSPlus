@@ -65,24 +65,45 @@ function checkSOS(board, size, index) {
   ];
 
   let foundCount = 0;
+  let sosCells = [];
 
-  function getCell(r, c) {
+  function getIndex(r, c) {
     if (r < 0 || r >= size || c < 0 || c >= size) return null;
-    return board[r * size + c];
+    return r * size + c;
   }
 
+  function getCell(r, c) {
+    const idx = getIndex(r, c);
+    return idx === null ? null : board[idx];
+  }
+
+  const placedLetter = board[index];
+
   for (const [dr, dc] of directions) {
-    const pattern = [
-      getCell(row - dr, col - dc),
-      getCell(row, col),
-      getCell(row + dr, col + dc),
-    ];
-    if (pattern[0] === "S" && pattern[1] === "O" && pattern[2] === "S") {
-      foundCount++;
+    if (placedLetter === "O") {
+      const idxBefore = getIndex(row - dr, col - dc);
+      const idxAfter = getIndex(row + dr, col + dc);
+      const before = getCell(row - dr, col - dc);
+      const after = getCell(row + dr, col + dc);
+      if (before === "S" && after === "S") {
+        foundCount++;
+        sosCells.push(idxBefore, index, idxAfter);
+      }
+    }
+
+    if (placedLetter === "S") {
+      const idxMid = getIndex(row + dr, col + dc);
+      const idxEnd = getIndex(row + 2 * dr, col + 2 * dc);
+      const mid = getCell(row + dr, col + dc);
+      const end = getCell(row + 2 * dr, col + 2 * dc);
+      if (mid === "O" && end === "S") {
+        foundCount++;
+        sosCells.push(index, idxMid, idxEnd);
+      }
     }
   }
 
-  return foundCount;
+  return { count: foundCount, cells: sosCells };
 }
 
 module.exports = { createRoom, joinRoom, getRoom, removePlayer, checkSOS };
