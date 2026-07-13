@@ -9,6 +9,7 @@ const gridLabel2 = document.getElementById("gridValueLabel2");
 
 let currentRoomCode = null;
 let myGridSize = null;
+let myPlayerId = null;
 
 gridSlider.addEventListener("input", () => {
   gridLabel.textContent = gridSlider.value;
@@ -17,6 +18,7 @@ gridSlider.addEventListener("input", () => {
 
 socket.on("connect", () => {
   statusEl.textContent = "Sunucuya bağlandı! ID: " + socket.id;
+  myPlayerId = socket.id;
 });
 
 socket.on("disconnect", () => {
@@ -52,6 +54,7 @@ socket.on("playerJoined", (room) => {
   roomInfoEl.textContent = `Oyuncu: ${room.players.length}/${room.maxPlayers} — Oda: ${room.code}`;
   if (room.started) {
     renderBoard(room.board, room.gridSize);
+    updateGameInfo(room.turn, room.scores);
   }
 });
 
@@ -59,8 +62,18 @@ socket.on("joinError", (message) => {
   errorMsgEl.textContent = message;
 });
 
+socket.on("moveMade", ({ board, turn, scores, gameOver }) => {
+  renderBoard(board, myGridSize);
+  updateGameInfo(turn, scores);
+  if (gameOver) {
+    showGameOver(scores);
+  }
+});
+
 function renderBoard(board, size) {
   document.getElementById("lobby").style.display = "none";
+  document.getElementById("gameInfo").style.display = "block";
+
   let gridDiv = document.getElementById("gameGrid");
   if (!gridDiv) {
     gridDiv = document.createElement("div");
@@ -77,6 +90,42 @@ function renderBoard(board, size) {
     cellDiv.addEventListener("click", (e) => openLetterMenu(e, index));
     gridDiv.appendChild(cellDiv);
   });
+}
+
+function updateGameInfo(turn, scores) {
+  const turnIndicator = document.getElementById("turnIndicator");
+  const scoreBoard = document.getElementById("scoreBoard");
+
+  if (turn === myPlayerId) {
+    turnIndicator.textContent = "🟢 Sıra sende!";
+    turnIndicator.style.color = "limegreen";
+  } else {
+    turnIndicator.textContent = "⏳ Rakibin sırası...";
+    turnIndicator.style.color = "gray";
+  }
+
+  scoreBoard.innerHTML = "";
+  for (const playerId in scores) {
+    const label = playerId === myPlayerId ? "Sen" : "Rakip";
+    const scoreLine = document.createElement("p");
+    scoreLine.textContent = `${label}: ${scores[playerId]} puan`;
+    scoreBoard.appendChild(scoreLine);
+  }
+}
+
+function showGameOver(scores) {
+  const turnIndicator = document.getElementById("turnIndicator");
+  const myScore = scores[myPlayerId] || 0;
+  const otherPlayerId = Object.keys(scores).find((id) => id !== myPlayerId);
+  const otherScore = scores[otherPlayerId] || 0;
+
+  let resultText;
+  if (myScore > otherScore) resultText = "🎉 Kazandın!";
+  else if (myScore < otherScore) resultText = "😔 Kaybettin.";
+  else resultText = "🤝 Berabere!";
+
+  turnIndicator.textContent = `Oyun bitti — ${resultText}`;
+  turnIndicator.style.color = "orange";
 }
 
 function openLetterMenu(event, index) {
@@ -113,10 +162,3 @@ function sendMove(index, letter) {
   socket.emit("makeMove", { code: currentRoomCode, index, letter });
   document.getElementById("letterMenu")?.remove();
 }
-
-socket.on("moveMade", ({ board, turn, scores, gameOver }) => {
-  renderBoard(board, myGridSize);
-  if (gameOver) {
-    alert("Oyun bitti! Skorlar: " + JSON.stringify(scores));
-  }
-});

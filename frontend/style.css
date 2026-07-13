@@ -1,3 +1,33 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #121212;
+  color: white;
+  padding: 20px;
+}
+
+.lobby-section {
+  margin-bottom: 20px;
+  padding: 12px;
+  background: #1c1c1e;
+  border-radius: 10px;
+}
+
+input[type="text"] {
+  padding: 6px;
+  border-radius: 6px;
+  border: none;
+  margin-right: 8px;
+}
+
+button {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  background: #ffffff;
+  cursor: pointer;
+  font-weight: bold;
+}
+
 #gameGrid {
   display: grid;
   gap: 4px;
@@ -35,4 +65,17 @@
   background: white;
   font-weight: bold;
   cursor: pointer;
+}
+
+#gameInfo {
+  margin: 20px;
+}
+
+#turnIndicator {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+#scoreBoard p {
+  margin: 4px 0;
 }
