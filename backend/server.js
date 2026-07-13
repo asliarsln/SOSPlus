@@ -1,7 +1,13 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
-const { createRoom, joinRoom, getRoom, removePlayer } = require("./gameStore");
+const {
+  createRoom,
+  joinRoom,
+  getRoom,
+  removePlayer,
+  checkSOS,
+} = require("./gameStore");
 
 const app = express();
 const server = http.createServer(app);
@@ -34,6 +40,32 @@ io.on("connection", (socket) => {
     }
     socket.join(code);
     io.to(code).emit("playerJoined", result.room);
+  });
+
+  socket.on("makeMove", ({ code, index, letter }) => {
+    const room = getRoom(code);
+    if (!room) return;
+    if (room.turn !== socket.id) return;
+    if (room.board[index] !== null) return;
+
+    room.board[index] = letter;
+    const sosCount = checkSOS(room.board, room.gridSize, index);
+
+    if (sosCount > 0) {
+      room.scores[socket.id] = (room.scores[socket.id] || 0) + sosCount;
+    } else {
+      const otherPlayer = room.players.find((id) => id !== socket.id);
+      room.turn = otherPlayer;
+    }
+
+    const isFull = room.board.every((cell) => cell !== null);
+
+    io.to(code).emit("moveMade", {
+      board: room.board,
+      turn: room.turn,
+      scores: room.scores,
+      gameOver: isFull,
+    });
   });
 
   socket.on("disconnect", () => {
