@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SOS Oyunu</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>SOS Oyunu</h1>
+    <p id="status">Sunucuya bağlanılıyor...</p>
+
+    <div id="lobby">
+      <div class="lobby-section">
+        <h3>Oda Kur</h3>
+        <label
+          >Grid boyutu: <span id="gridValueLabel">4</span>x<span
+            id="gridValueLabel2"
+            >4</span
+          ></label
+        >
+        <input type="range" id="gridSize" min="2" max="7" step="1" value="4" />
+        <button id="createBtn">Oda Kur</button>
+      </div>
+
+      <div class="lobby-section">
+        <h3>Odaya Katıl</h3>
+        <input
+          type="text"
+          id="joinCodeInput"
+          placeholder="Oda kodu girin"
+          maxlength="4"
+        />
+        <button id="joinBtn">Katıl</button>
+      </div>
+
+      <p id="roomInfo"></p>
+      <p id="errorMsg" style="color: red"></p>
+    </div>
+
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
