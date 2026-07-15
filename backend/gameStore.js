@@ -106,4 +106,21 @@ function checkSOS(board, size, index) {
   return { count: foundCount, cells: sosCells };
 }
 
-module.exports = { createRoom, joinRoom, getRoom, removePlayer, checkSOS };
+function resetRoom(code) {
+  const room = rooms[code];
+  if (!room) return null;
+  room.board = Array(room.gridSize * room.gridSize).fill(null);
+  room.scores = {};
+  room.players.forEach((id) => (room.scores[id] = 0));
+  room.turn = room.players[0];
+  return room;
+}
+
+module.exports = {
+  createRoom,
+  joinRoom,
+  getRoom,
+  removePlayer,
+  checkSOS,
+  resetRoom,
+};

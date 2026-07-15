@@ -136,6 +136,8 @@ function showGameOver(scores) {
 
   turnIndicator.textContent = `Oyun bitti — ${resultText}`;
   turnIndicator.style.color = "orange";
+
+  document.getElementById("rematchBtn").style.display = "inline-block";
 }
 
 function openLetterMenu(event, index) {
@@ -176,3 +178,39 @@ function sendMove(index, letter) {
   socket.emit("makeMove", { code: currentRoomCode, index, letter });
   document.getElementById("letterMenu")?.remove();
 }
+
+document.getElementById("rematchBtn").addEventListener("click", () => {
+  socket.emit("rematchRequest", currentRoomCode);
+  document.getElementById("rematchBtn").style.display = "none";
+  document.getElementById("turnIndicator").textContent =
+    "Rakibin onayı bekleniyor...";
+});
+
+socket.on("rematchOffer", () => {
+  const turnIndicator = document.getElementById("turnIndicator");
+  turnIndicator.innerHTML = `
+    Rakibin tekrar oynamak istiyor!
+    <button id="acceptRematchBtn">Kabul Et</button>
+    <button id="declineRematchBtn">Reddet</button>
+  `;
+
+  document.getElementById("acceptRematchBtn").onclick = () => {
+    socket.emit("rematchAccept", currentRoomCode);
+  };
+
+  document.getElementById("declineRematchBtn").onclick = () => {
+    socket.emit("rematchDecline", currentRoomCode);
+    turnIndicator.textContent = "Rövanş reddedildi.";
+  };
+});
+
+socket.on("rematchStarted", (room) => {
+  updateGameInfo(room.turn, room.scores);
+  renderBoard(room.board, room.gridSize);
+});
+
+socket.on("rematchDeclined", () => {
+  document.getElementById("turnIndicator").textContent =
+    "Rakip rövanşı reddetti.";
+  document.getElementById("rematchBtn").style.display = "inline-block";
+});

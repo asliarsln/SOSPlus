@@ -7,6 +7,7 @@ const {
   getRoom,
   removePlayer,
   checkSOS,
+  resetRoom,
 } = require("./gameStore");
 
 const app = express();
@@ -67,6 +68,22 @@ io.on("connection", (socket) => {
       gameOver: isFull,
       sosCells: result.cells,
     });
+  });
+
+  socket.on("rematchRequest", (code) => {
+    const room = getRoom(code);
+    if (!room) return;
+    socket.to(code).emit("rematchOffer", { fromId: socket.id });
+  });
+
+  socket.on("rematchAccept", (code) => {
+    const room = resetRoom(code);
+    if (!room) return;
+    io.to(code).emit("rematchStarted", room);
+  });
+
+  socket.on("rematchDecline", (code) => {
+    socket.to(code).emit("rematchDeclined");
   });
 
   socket.on("disconnect", () => {
