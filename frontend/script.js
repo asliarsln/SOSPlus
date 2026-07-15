@@ -7,6 +7,7 @@ const gridSlider = document.getElementById("gridSize");
 const gridLabel = document.getElementById("gridValueLabel");
 const gridLabel2 = document.getElementById("gridValueLabel2");
 
+let currentTurn = null;
 let currentRoomCode = null;
 let myGridSize = null;
 let myPlayerId = null;
@@ -53,8 +54,8 @@ socket.on("playerJoined", (room) => {
   myGridSize = room.gridSize;
   roomInfoEl.textContent = `Oyuncu: ${room.players.length}/${room.maxPlayers} — Oda: ${room.code}`;
   if (room.started) {
-    renderBoard(room.board, room.gridSize);
     updateGameInfo(room.turn, room.scores);
+    renderBoard(room.board, room.gridSize);
   }
 });
 
@@ -63,8 +64,8 @@ socket.on("joinError", (message) => {
 });
 
 socket.on("moveMade", ({ board, turn, scores, gameOver, sosCells }) => {
-  renderBoard(board, myGridSize, sosCells);
   updateGameInfo(turn, scores);
+  renderBoard(board, myGridSize, sosCells);
   if (gameOver) {
     showGameOver(scores);
   }
@@ -83,11 +84,16 @@ function renderBoard(board, size, sosCells = []) {
   gridDiv.style.gridTemplateColumns = `repeat(${size}, 50px)`;
   gridDiv.innerHTML = "";
 
+  const isMyTurn = currentTurn === myPlayerId;
+
   board.forEach((cell, index) => {
     const cellDiv = document.createElement("div");
     cellDiv.className = "cell";
     if (sosCells.includes(index)) {
       cellDiv.classList.add("sos-highlight");
+    }
+    if (!isMyTurn) {
+      cellDiv.classList.add("cell-disabled");
     }
     cellDiv.textContent = cell || "";
     cellDiv.addEventListener("click", (e) => openLetterMenu(e, index));
@@ -96,6 +102,7 @@ function renderBoard(board, size, sosCells = []) {
 }
 
 function updateGameInfo(turn, scores) {
+  currentTurn = turn;
   const turnIndicator = document.getElementById("turnIndicator");
   const scoreBoard = document.getElementById("scoreBoard");
 
@@ -134,6 +141,10 @@ function showGameOver(scores) {
 function openLetterMenu(event, index) {
   const existingMenu = document.getElementById("letterMenu");
   if (existingMenu) existingMenu.remove();
+
+  if (currentTurn !== myPlayerId) {
+    return;
+  }
 
   const cell = event.target;
   if (cell.textContent !== "") return;

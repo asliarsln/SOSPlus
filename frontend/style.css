@@ -98,3 +98,8 @@ button {
 .sos-highlight {
   animation: sosPulse 1s ease-out;
 }
+
+.cell-disabled {
+  cursor: default;
+  opacity: 0.6;
+}
