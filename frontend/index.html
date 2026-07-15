@@ -18,6 +18,17 @@
           ></label
         >
         <input type="range" id="gridSize" min="3" max="7" step="1" value="4" />
+
+        <label>Kendime Güveniyorum: <span id="confidenceLabel">0</span></label>
+        <input
+          type="range"
+          id="confidenceSlider"
+          min="0"
+          max="3"
+          step="1"
+          value="0"
+        />
+
         <button id="createBtn">Oda Kur</button>
       </div>
 
@@ -39,6 +50,7 @@
     <div id="gameInfo" style="display: none">
       <p id="turnIndicator"></p>
       <div id="scoreBoard"></div>
+      <button id="changeBtn">Değiştir <span id="changeBadge">1</span></button>
       <button id="rematchBtn" style="display: none">Tekrar Oyna</button>
       <button id="mainMenuBtn" style="display: none">Ana Menüye Dön</button>
     </div>

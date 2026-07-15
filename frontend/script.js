@@ -5,15 +5,23 @@ const errorMsgEl = document.getElementById("errorMsg");
 const gridSlider = document.getElementById("gridSize");
 const gridLabel = document.getElementById("gridValueLabel");
 const gridLabel2 = document.getElementById("gridValueLabel2");
+const confidenceSlider = document.getElementById("confidenceSlider");
+const confidenceLabel = document.getElementById("confidenceLabel");
 
 let currentTurn = null;
 let currentRoomCode = null;
 let myGridSize = null;
 let myPlayerId = null;
+let changeMode = false;
+let myChangesLeft = 1;
 
 gridSlider.addEventListener("input", () => {
   gridLabel.textContent = gridSlider.value;
   gridLabel2.textContent = gridSlider.value;
+});
+
+confidenceSlider.addEventListener("input", () => {
+  confidenceLabel.textContent = confidenceSlider.value;
 });
 
 socket.on("connect", () => {
@@ -26,7 +34,8 @@ socket.on("disconnect", () => {
 
 document.getElementById("createBtn").addEventListener("click", () => {
   const gridSize = parseInt(gridSlider.value);
-  socket.emit("createRoom", gridSize);
+  const confidence = parseInt(confidenceSlider.value);
+  socket.emit("createRoom", { gridSize, confidence });
 });
 
 document.getElementById("joinBtn").addEventListener("click", () => {
@@ -44,6 +53,7 @@ socket.on("roomCreated", (room) => {
   currentRoomCode = room.code;
   myGridSize = room.gridSize;
   roomInfoEl.textContent = `Oda kuruldu! Kod: ${room.code} — Arkadaşını davet et!`;
+  updateChangeBadge(room.changesLeft);
 });
 
 socket.on("playerJoined", (room) => {
@@ -51,6 +61,7 @@ socket.on("playerJoined", (room) => {
   currentRoomCode = room.code;
   myGridSize = room.gridSize;
   roomInfoEl.textContent = `Oyuncu: ${room.players.length}/${room.maxPlayers} — Oda: ${room.code}`;
+  updateChangeBadge(room.changesLeft);
   if (room.started) {
     updateGameInfo(room.turn, room.scores);
     renderBoard(room.board, room.gridSize);
@@ -68,6 +79,15 @@ socket.on("moveMade", ({ board, turn, scores, gameOver, sosCells }) => {
     showGameOver(scores);
   }
 });
+
+socket.on("changesUpdated", (changesLeft) => {
+  updateChangeBadge(changesLeft);
+});
+
+function updateChangeBadge(changesLeft) {
+  myChangesLeft = changesLeft[myPlayerId] ?? 0;
+  document.getElementById("changeBadge").textContent = myChangesLeft;
+}
 
 function renderBoard(board, size, sosCells = []) {
   document.getElementById("lobby").style.display = "none";
@@ -95,11 +115,21 @@ function renderBoard(board, size, sosCells = []) {
     }
     if (cell) {
       cellDiv.textContent = cell.letter;
-      cellDiv.classList.add(
-        cell.playerId === myPlayerId ? "my-letter" : "opponent-letter",
-      );
+      if (cell.playerId === null) {
+        cellDiv.classList.add("neutral-letter");
+      } else {
+        cellDiv.classList.add(
+          cell.playerId === myPlayerId ? "my-letter" : "opponent-letter",
+        );
+      }
     }
-    cellDiv.addEventListener("click", (e) => openLetterMenu(e, index));
+    cellDiv.addEventListener("click", (e) => {
+      if (changeMode) {
+        handleChangeClick(index);
+      } else {
+        openLetterMenu(e, index);
+      }
+    });
     gridDiv.appendChild(cellDiv);
   });
 }
@@ -182,6 +212,22 @@ function sendMove(index, letter) {
   document.getElementById("letterMenu")?.remove();
 }
 
+function handleChangeClick(index) {
+  const cellDiv = document.querySelectorAll("#gameGrid .cell")[index];
+  if (cellDiv.textContent === "") return;
+  socket.emit("changeLetter", { code: currentRoomCode, index });
+  changeMode = false;
+  document.getElementById("changeBtn").classList.remove("active-change");
+}
+
+document.getElementById("changeBtn").addEventListener("click", () => {
+  if (myChangesLeft <= 0) return;
+  changeMode = !changeMode;
+  document
+    .getElementById("changeBtn")
+    .classList.toggle("active-change", changeMode);
+});
+
 document.getElementById("rematchBtn").addEventListener("click", () => {
   socket.emit("rematchRequest", currentRoomCode);
   document.getElementById("rematchBtn").style.display = "none";
@@ -210,6 +256,7 @@ socket.on("rematchOffer", () => {
 socket.on("rematchStarted", (room) => {
   updateGameInfo(room.turn, room.scores);
   renderBoard(room.board, room.gridSize);
+  updateChangeBadge(room.changesLeft);
 });
 
 socket.on("rematchDeclined", () => {
@@ -241,6 +288,7 @@ function resetToLobby() {
   currentRoomCode = null;
   myGridSize = null;
   currentTurn = null;
+  changeMode = false;
 
   document.getElementById("gameInfo").style.display = "none";
   document.getElementById("rematchBtn").style.display = "none";
