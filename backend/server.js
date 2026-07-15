@@ -1,5 +1,6 @@
 const express = require("express");
 const http = require("http");
+const path = require("path");
 const { Server } = require("socket.io");
 
 const app = express();
@@ -9,6 +10,8 @@ const io = new Server(server, {
     origin: "*",
   },
 });
+
+app.use(express.static(path.join(__dirname, "../frontend")));
 
 const rooms = {};
 
