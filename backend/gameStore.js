@@ -74,6 +74,7 @@ function checkSOS(board, size, index) {
   ];
 
   let foundCount = 0;
+  let bonusPoints = 0;
   let sosCells = [];
 
   function getIndex(r, c) {
@@ -86,7 +87,17 @@ function checkSOS(board, size, index) {
     return idx === null ? null : board[idx];
   }
 
-  const placedLetter = board[index];
+  const placedCell = board[index];
+  const placedLetter = placedCell ? placedCell.letter : null;
+
+  function calcPoints(idx1, idx2, idx3) {
+    const c1 = board[idx1];
+    const c2 = board[idx2];
+    const c3 = board[idx3];
+    const sameOwner =
+      c1.playerId === c2.playerId && c2.playerId === c3.playerId;
+    return sameOwner ? 3 : 1;
+  }
 
   for (const [dr, dc] of directions) {
     if (placedLetter === "O") {
@@ -94,8 +105,9 @@ function checkSOS(board, size, index) {
       const idxAfter = getIndex(row + dr, col + dc);
       const before = getCell(row - dr, col - dc);
       const after = getCell(row + dr, col + dc);
-      if (before === "S" && after === "S") {
+      if (before?.letter === "S" && after?.letter === "S") {
         foundCount++;
+        bonusPoints += calcPoints(idxBefore, index, idxAfter);
         sosCells.push(idxBefore, index, idxAfter);
       }
     }
@@ -105,14 +117,15 @@ function checkSOS(board, size, index) {
       const idxEnd = getIndex(row + 2 * dr, col + 2 * dc);
       const mid = getCell(row + dr, col + dc);
       const end = getCell(row + 2 * dr, col + 2 * dc);
-      if (mid === "O" && end === "S") {
+      if (mid?.letter === "O" && end?.letter === "S") {
         foundCount++;
+        bonusPoints += calcPoints(index, idxMid, idxEnd);
         sosCells.push(index, idxMid, idxEnd);
       }
     }
   }
 
-  return { count: foundCount, cells: sosCells };
+  return { count: foundCount, points: bonusPoints, cells: sosCells };
 }
 
 function resetRoom(code) {

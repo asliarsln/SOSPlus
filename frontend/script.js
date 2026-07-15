@@ -1,6 +1,5 @@
 const socket = io("http://localhost:3000");
 
-const statusEl = document.getElementById("status");
 const roomInfoEl = document.getElementById("roomInfo");
 const errorMsgEl = document.getElementById("errorMsg");
 const gridSlider = document.getElementById("gridSize");
@@ -17,8 +16,12 @@ gridSlider.addEventListener("input", () => {
   gridLabel2.textContent = gridSlider.value;
 });
 
+socket.on("connect", () => {
+  myPlayerId = socket.id;
+});
+
 socket.on("disconnect", () => {
-  statusEl.textContent = "Bağlantı kesildi.";
+  console.log("Bağlantı kesildi.");
 });
 
 document.getElementById("createBtn").addEventListener("click", () => {
@@ -90,7 +93,12 @@ function renderBoard(board, size, sosCells = []) {
     if (!isMyTurn) {
       cellDiv.classList.add("cell-disabled");
     }
-    cellDiv.textContent = cell || "";
+    if (cell) {
+      cellDiv.textContent = cell.letter;
+      cellDiv.classList.add(
+        cell.playerId === myPlayerId ? "my-letter" : "opponent-letter",
+      );
+    }
     cellDiv.addEventListener("click", (e) => openLetterMenu(e, index));
     gridDiv.appendChild(cellDiv);
   });
@@ -209,6 +217,7 @@ socket.on("rematchDeclined", () => {
     "Rakip rövanşı reddetti.";
   document.getElementById("rematchBtn").style.display = "inline-block";
 });
+
 socket.on("opponentLeft", () => {
   const turnIndicator = document.getElementById("turnIndicator");
   turnIndicator.textContent = "⚠️ Rakibin bağlantısı kesildi.";
