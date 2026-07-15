@@ -20,6 +20,7 @@ function createRoom(hostSocketId, gridSize) {
     board,
     turn: hostSocketId,
     scores: {},
+    createdAt: Date.now(),
   };
   return rooms[code];
 }
@@ -45,9 +46,17 @@ function getRoom(code) {
 function removePlayer(socketId) {
   for (const code in rooms) {
     const room = rooms[code];
-    room.players = room.players.filter((id) => id !== socketId);
-    if (room.players.length === 0) delete rooms[code];
+    if (room.players.includes(socketId)) {
+      room.players = room.players.filter((id) => id !== socketId);
+      if (room.players.length === 0) {
+        delete rooms[code];
+      } else {
+        room.started = false;
+      }
+      return { code, room: rooms[code] || null };
+    }
   }
+  return null;
 }
 
 function checkSOS(board, size, index) {
@@ -115,6 +124,18 @@ function resetRoom(code) {
   room.turn = room.players[0];
   return room;
 }
+
+function cleanupOldRooms() {
+  const now = Date.now();
+  const THIRTY_MINUTES = 30 * 60 * 1000;
+  for (const code in rooms) {
+    if (now - rooms[code].createdAt > THIRTY_MINUTES) {
+      delete rooms[code];
+    }
+  }
+}
+
+setInterval(cleanupOldRooms, 10 * 60 * 1000);
 
 module.exports = {
   createRoom,

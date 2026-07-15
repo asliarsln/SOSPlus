@@ -88,7 +88,10 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log("Oyuncu ayrıldı:", socket.id);
-    removePlayer(socket.id);
+    const result = removePlayer(socket.id);
+    if (result && result.room) {
+      io.to(result.code).emit("opponentLeft");
+    }
   });
 });
 

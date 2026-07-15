@@ -111,3 +111,9 @@ button {
   cursor: default;
   opacity: 0.6;
 }
+
+#mainMenuBtn {
+  margin-top: 8px;
+  background: #ff453a;
+  color: white;
+}

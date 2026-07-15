@@ -209,3 +209,39 @@ socket.on("rematchDeclined", () => {
     "Rakip rövanşı reddetti.";
   document.getElementById("rematchBtn").style.display = "inline-block";
 });
+socket.on("opponentLeft", () => {
+  const turnIndicator = document.getElementById("turnIndicator");
+  turnIndicator.textContent = "⚠️ Rakibin bağlantısı kesildi.";
+  turnIndicator.style.color = "red";
+  document.getElementById("rematchBtn").style.display = "none";
+  document.getElementById("mainMenuBtn").style.display = "inline-block";
+
+  const gridDiv = document.getElementById("gameGrid");
+  if (gridDiv) {
+    gridDiv.querySelectorAll(".cell").forEach((cell) => {
+      cell.classList.add("cell-disabled");
+    });
+  }
+});
+
+document.getElementById("mainMenuBtn").addEventListener("click", () => {
+  resetToLobby();
+});
+
+function resetToLobby() {
+  currentRoomCode = null;
+  myGridSize = null;
+  currentTurn = null;
+
+  document.getElementById("gameInfo").style.display = "none";
+  document.getElementById("rematchBtn").style.display = "none";
+  document.getElementById("mainMenuBtn").style.display = "none";
+
+  const gridDiv = document.getElementById("gameGrid");
+  if (gridDiv) gridDiv.remove();
+
+  document.getElementById("lobby").style.display = "block";
+  roomInfoEl.textContent = "";
+  errorMsgEl.textContent = "";
+  document.getElementById("joinCodeInput").value = "";
+}
