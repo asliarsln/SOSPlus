@@ -3,6 +3,11 @@ body {
   background: #121212;
   color: white;
   padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .lobby-section {
@@ -27,11 +32,11 @@ button {
   cursor: pointer;
   font-weight: bold;
 }
-
 #gameGrid {
   display: grid;
   gap: 4px;
-  margin: 20px;
+  margin: 20px auto;
+  justify-content: center;
 }
 
 .cell {
@@ -68,7 +73,10 @@ button {
 }
 
 #gameInfo {
-  margin: 20px;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 #turnIndicator {

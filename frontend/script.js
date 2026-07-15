@@ -17,11 +17,6 @@ gridSlider.addEventListener("input", () => {
   gridLabel2.textContent = gridSlider.value;
 });
 
-socket.on("connect", () => {
-  statusEl.textContent = "Sunucuya bağlandı! ID: " + socket.id;
-  myPlayerId = socket.id;
-});
-
 socket.on("disconnect", () => {
   statusEl.textContent = "Bağlantı kesildi.";
 });
