@@ -1,25 +1,25 @@
 <!doctype html>
-<html lang="tr">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>SOS Oyunu</title>
+    <title>SOS Plus</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <h1>SOS Oyunu</h1>
+    <h1>SOS Plus</h1>
 
     <div id="lobby">
       <div class="lobby-section">
-        <h3>Oda Kur</h3>
+        <h3>Create Room</h3>
         <label
-          >Grid boyutu: <span id="gridValueLabel">4</span>x<span
+          >Grid Size: <span id="gridValueLabel">4</span>x<span
             id="gridValueLabel2"
             >4</span
           ></label
         >
         <input type="range" id="gridSize" min="3" max="7" step="1" value="4" />
 
-        <label>Kendime Güveniyorum: <span id="confidenceLabel">0</span></label>
+        <label>Confidence Level: <span id="confidenceLabel">0</span></label>
         <input
           type="range"
           id="confidenceSlider"
@@ -29,18 +29,18 @@
           value="0"
         />
 
-        <button id="createBtn">Oda Kur</button>
+        <button id="createBtn">Create Room</button>
       </div>
 
       <div class="lobby-section">
-        <h3>Odaya Katıl</h3>
+        <h3>Join Room</h3>
         <input
           type="text"
           id="joinCodeInput"
-          placeholder="Oda kodu girin"
+          placeholder="Enter room code"
           maxlength="4"
         />
-        <button id="joinBtn">Katıl</button>
+        <button id="joinBtn">Join</button>
       </div>
 
       <p id="roomInfo"></p>
@@ -50,9 +50,9 @@
     <div id="gameInfo" style="display: none">
       <p id="turnIndicator"></p>
       <div id="scoreBoard"></div>
-      <button id="changeBtn">Değiştir <span id="changeBadge">1</span></button>
-      <button id="rematchBtn" style="display: none">Tekrar Oyna</button>
-      <button id="mainMenuBtn" style="display: none">Ana Menüye Dön</button>
+      <button id="changeBtn">Change <span id="changeBadge">1</span></button>
+      <button id="rematchBtn" style="display: none">Rematch</button>
+      <button id="mainMenuBtn" style="display: none">Main Menu</button>
     </div>
 
     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>

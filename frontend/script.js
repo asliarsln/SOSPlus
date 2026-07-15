@@ -29,7 +29,7 @@ socket.on("connect", () => {
 });
 
 socket.on("disconnect", () => {
-  console.log("Bağlantı kesildi.");
+  console.log("Disconnected from server");
 });
 
 document.getElementById("createBtn").addEventListener("click", () => {
@@ -52,7 +52,7 @@ socket.on("roomCreated", (room) => {
   errorMsgEl.textContent = "";
   currentRoomCode = room.code;
   myGridSize = room.gridSize;
-  roomInfoEl.textContent = `Oda kuruldu! Kod: ${room.code} — Arkadaşını davet et!`;
+  roomInfoEl.textContent = `Room created! Code: ${room.code} — Invite a friend!`;
   updateChangeBadge(room.changesLeft);
 });
 
@@ -60,7 +60,7 @@ socket.on("playerJoined", (room) => {
   errorMsgEl.textContent = "";
   currentRoomCode = room.code;
   myGridSize = room.gridSize;
-  roomInfoEl.textContent = `Oyuncu: ${room.players.length}/${room.maxPlayers} — Oda: ${room.code}`;
+  roomInfoEl.textContent = `Player: ${room.players.length}/${room.maxPlayers} — Room: ${room.code}`;
   updateChangeBadge(room.changesLeft);
   if (room.started) {
     updateGameInfo(room.turn, room.scores);
@@ -140,18 +140,18 @@ function updateGameInfo(turn, scores) {
   const scoreBoard = document.getElementById("scoreBoard");
 
   if (turn === myPlayerId) {
-    turnIndicator.textContent = "🟢 Sıra sende!";
+    turnIndicator.textContent = "🟢 Your turn!";
     turnIndicator.style.color = "limegreen";
   } else {
-    turnIndicator.textContent = "⏳ Rakibin sırası...";
+    turnIndicator.textContent = "⏳ Opponent's turn...";
     turnIndicator.style.color = "gray";
   }
 
   scoreBoard.innerHTML = "";
   for (const playerId in scores) {
-    const label = playerId === myPlayerId ? "Sen" : "Rakip";
+    const label = playerId === myPlayerId ? "You" : "Opponent";
     const scoreLine = document.createElement("p");
-    scoreLine.textContent = `${label}: ${scores[playerId]} puan`;
+    scoreLine.textContent = `${label}: ${scores[playerId]} points`;
     scoreBoard.appendChild(scoreLine);
   }
 }
@@ -163,11 +163,11 @@ function showGameOver(scores) {
   const otherScore = scores[otherPlayerId] || 0;
 
   let resultText;
-  if (myScore > otherScore) resultText = "🎉 Kazandın!";
-  else if (myScore < otherScore) resultText = "😔 Kaybettin.";
-  else resultText = "🤝 Berabere!";
+  if (myScore > otherScore) resultText = "🎉 You Won!";
+  else if (myScore < otherScore) resultText = "😔 You Lost.";
+  else resultText = "🤝 It's a Draw!";
 
-  turnIndicator.textContent = `Oyun bitti — ${resultText}`;
+  turnIndicator.textContent = `Game Over — ${resultText}`;
   turnIndicator.style.color = "orange";
 
   document.getElementById("rematchBtn").style.display = "inline-block";
@@ -232,15 +232,15 @@ document.getElementById("rematchBtn").addEventListener("click", () => {
   socket.emit("rematchRequest", currentRoomCode);
   document.getElementById("rematchBtn").style.display = "none";
   document.getElementById("turnIndicator").textContent =
-    "Rakibin onayı bekleniyor...";
+    "Rematch request sent, waiting for opponent's response...";
 });
 
 socket.on("rematchOffer", () => {
   const turnIndicator = document.getElementById("turnIndicator");
   turnIndicator.innerHTML = `
-    Rakibin tekrar oynamak istiyor!
-    <button id="acceptRematchBtn">Kabul Et</button>
-    <button id="declineRematchBtn">Reddet</button>
+    Opponent wants a rematch!
+    <button id="acceptRematchBtn">Accept</button>
+    <button id="declineRematchBtn">Decline</button>
   `;
 
   document.getElementById("acceptRematchBtn").onclick = () => {
@@ -249,7 +249,7 @@ socket.on("rematchOffer", () => {
 
   document.getElementById("declineRematchBtn").onclick = () => {
     socket.emit("rematchDecline", currentRoomCode);
-    turnIndicator.textContent = "Rövanş reddedildi.";
+    turnIndicator.textContent = "Rematch declined.";
   };
 });
 
@@ -261,13 +261,13 @@ socket.on("rematchStarted", (room) => {
 
 socket.on("rematchDeclined", () => {
   document.getElementById("turnIndicator").textContent =
-    "Rakip rövanşı reddetti.";
+    "Opponent declined the rematch.";
   document.getElementById("rematchBtn").style.display = "inline-block";
 });
 
 socket.on("opponentLeft", () => {
   const turnIndicator = document.getElementById("turnIndicator");
-  turnIndicator.textContent = "⚠️ Rakibin bağlantısı kesildi.";
+  turnIndicator.textContent = "⚠️ Opponent's connection lost.";
   turnIndicator.style.color = "red";
   document.getElementById("rematchBtn").style.display = "none";
   document.getElementById("mainMenuBtn").style.display = "inline-block";

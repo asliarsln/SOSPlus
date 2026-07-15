@@ -27,9 +27,9 @@ function createRoom(hostSocketId, gridSize) {
 
 function joinRoom(code, socketId) {
   const room = rooms[code];
-  if (!room) return { error: "Oda bulunamadı" };
-  if (room.players.length >= room.maxPlayers) return { error: "Oda dolu" };
-  if (room.started) return { error: "Oyun zaten başladı" };
+  if (!room) return { error: "Room Not Found" };
+  if (room.players.length >= room.maxPlayers) return { error: "Room Full" };
+  if (room.started) return { error: "Game Already Started" };
   room.players.push(socketId);
   room.scores[socketId] = 0;
   room.scores[room.players[0]] = room.scores[room.players[0]] || 0;

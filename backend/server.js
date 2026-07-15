@@ -160,11 +160,11 @@ io.on("connection", (socket) => {
     const room = rooms[code];
 
     if (!room) {
-      socket.emit("joinError", "Oda bulunamadı.");
+      socket.emit("joinError", "Room Not Found");
       return;
     }
     if (room.players.length >= room.maxPlayers) {
-      socket.emit("joinError", "Oda dolu.");
+      socket.emit("joinError", "Room Full");
       return;
     }
 
@@ -313,5 +313,5 @@ setInterval(
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Server ${PORT} portunda çalışıyor.`);
+  console.log(`Server running on port ${PORT}.`);
 });
